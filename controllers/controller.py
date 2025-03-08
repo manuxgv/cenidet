@@ -37,7 +37,7 @@ class FormController:
             self.model.save_data('CALIFICACIONES', self.step_data.get(3, []))
             self.model.save_data('MATERIAS', self.step_data.get(4, []))
             self.model.save_data('16FP', self.step_data.get(5, []))
-            self.model.save_data('RESULTADOS', self.step_data.get(6, []))
+            #self.model.save_data('RESULTADOS', self.step_data.get(6, []))
 
             # Generar la predicción
             self.generate_prediction()

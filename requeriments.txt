@@ -1,6 +1,0 @@
-nicegui
-tensorflow
-keras
-pandas
-openpyxl
-imbalanced-learn  
