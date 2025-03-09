@@ -96,6 +96,7 @@ class FormController:
 
         except Exception as e:
             print(f"❌ Error en la predicción: {e}")
+        return predicted_class
 
     def preprocess_dataset(self, df):
         """ Limpia el dataset eliminando texto y convirtiendo todo a numérico """

@@ -36,6 +36,8 @@ def get_last_id():
 
 # Variable global para controlar el paso del formulario
 step = 1
+pr = ""
+bgcolor = ""
 
 @ui.page('/menu')
 def show_menu():
@@ -43,7 +45,7 @@ def show_menu():
     with ui.row().classes('h-screen') as menul:
         with ui.column().classes('w-[150px] bg-gray-200 p-4 shadow-lg fixed h-full'):
             ui.label("Menú").classes('text-lg font-bold mb-4')
-            ui.button("Ingresar alumno al modelo", on_click=show_data).classes('w-full mb-2')
+            ui.button("Ingresar alumno al modelo", on_click=reset).classes('w-full mb-2')
             ui.button("Panel de control", on_click=show_levels).classes('w-full mb-2')
             ui.button("Consultar alumno", on_click=show_campus).classes('w-full mb-2')
             ui.button("Acerca de", on_click=show_matriculas).classes('w-full mb-2')
@@ -69,6 +71,12 @@ def go_back():
     step -= 2   # Retroceder al paso anterior
     #ui.notify(step, type="negative")
     show_data()  # Mostrar el paso anterior
+
+def reset():
+    global step
+    step = 1
+    show_data()
+
 
 def show_data():
     global step
@@ -113,9 +121,9 @@ async def finish():
         ui.notify(f"Formulario completado y datos guardados con ID {current_id}.", type="positive")
     
     current_id += 1
-    form_data.clear()
+    #form_data.clear()
     step = 1  # Reiniciar el paso
-    show_data()
+    show_pronostico()
 
 
 async def save_and_finish(meses, clase, factores_coincidentes, porcentajeS):
@@ -467,6 +475,39 @@ def show_sixth_step():
                     'porcentajeS': porcentajeS.value
                 })
             ,go_back())).classes('mt-2')
+
+
+# Mostrar el resultado
+def show_pronostico():
+    global pr, bgcolor
+    content_area.clear()
+
+    with content_area:
+        ui.label("Pronóstico generado").classes('text-2xl font-bold')
+        #ui.label('El pronóstico del alumno '+str(form_data.get('nombreAlumno'))+' es: ').classes('mt-4')
+        
+        if controller.generate_prediction() == 1:
+            pr = 'Excelente candidato'
+            bgcolor = '#eaf6eb'
+        elif controller.generate_prediction() == 2:
+            pr = 'Buen candidato'
+            bgcolor = '#ddeeff'
+        elif controller.generate_prediction() == 3:
+            pr = 'Candidato regular'
+            bgcolor = '#fff2cc'
+        elif controller.generate_prediction() == 4:
+            pr = 'El candidato no cubre el perfil'
+            bgcolor = '#f8cecc'
+        ui.add_head_html('''
+        <style type="text/tailwindcss">
+            h2 {
+                font-size: 150%;
+            }
+        </style>
+        ''')
+        ui.query('body').style(f'background-color: {bgcolor}')
+        ui.html('<h2>El pronóstico del alumno(a) '+form_data.get('nombreAlumno')+' es: <b>"'+pr+'"</b></h2>')
+
 
 
 # Llamar a la función inicial para mostrar el menú
