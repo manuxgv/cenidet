@@ -4,6 +4,7 @@ import os
 from openpyxl import load_workbook
 from controllers.controller import FormController
 from models.excel_model import ExcelModel
+import asyncio
 
 
 # Instancia del modelo y el controlador
@@ -101,24 +102,39 @@ def save_step_data(step, data):
 
 
 
-def finish():
+
+async def finish():
+    global step
     global current_id
-    controller.save_data()  # Guardar todos los datos en el archivo Excel
-    ui.notify(f"Formulario completado y datos guardados con ID {current_id}.", type="positive")
+    controller.save_data()
     
-    current_id += 1  # Incrementar el ID para el próximo alumno
+    # Asegurar que las actualizaciones de UI ocurran dentro de un contexto válido
+    with content_area:
+        ui.notify(f"Formulario completado y datos guardados con ID {current_id}.", type="positive")
+    
+    current_id += 1
+    form_data.clear()
+    step = 1  # Reiniciar el paso
+    show_data()
 
 
-    #ui.navigate("/")  # O navegar a donde sea necesario
+async def save_and_finish(meses, clase, factores_coincidentes, porcentajeS):
+    with content_area:
+        spinner = ui.spinner('dots', size='3em', color='warning')
+        await asyncio.sleep(0.1)  # Breve espera para asegurar que el spinner aparezca
 
-def save_and_finish(meses, clase, factores_coincidentes, porcentajeS):
-    save_step_data(6, [meses, clase, factores_coincidentes,porcentajeS])  # Guarda el último paso
-    finish()  # Llama a finish() para guardar todo en Excel
+    # Esta parte puede ser la que realmente toma tiempo
+    save_step_data(6, [meses, clase, factores_coincidentes, porcentajeS])  
+    await finish()
+
+    with content_area:
+        spinner.set_visibility(False)
 
 
 
 
-form_data = {}  # Diccionario global para almacenar los valores del formulario
+
+form_data = {}  # Diccionario global para almacenar los valores del formulariow
 def show_first_step():
     global step
     step = 2  # Cambiar al siguiente paso
@@ -438,18 +454,10 @@ def show_sixth_step():
 
         # Botón "Finalizar" con validación implícita y persistencia de datos
         ui.button("Finalizar", on_click=lambda: (
-            ui.notify("Por favor completa todos los campos obligatorios.", type="negative")
-            if not (factores_coincidentes.value and porcentajeS.value)
-            else (
-                form_data.update({
-                    'meses': meses.value,
-                    'clase': clase.value,
-                    'factores_coincidentes': factores_coincidentes.value,
-                    'porcentajeS': porcentajeS.value
-                }),
-                save_and_finish(meses.value, clase.value, factores_coincidentes.value, porcentajeS.value)
-            )
-        )).classes('mt-2')
+                    ui.notify("Por favor completa todos los campos obligatorios.", type="negative")
+                    if not (factores_coincidentes.value and porcentajeS.value)
+                    else asyncio.create_task(save_and_finish(meses.value, clase.value, factores_coincidentes.value, porcentajeS.value))
+                )).classes('mt-2')
 
         ui.button("Regresar", on_click=lambda:( 
                     form_data.update({
