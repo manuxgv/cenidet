@@ -462,6 +462,12 @@ def show_sixth_step():
 
         # Botón "Finalizar" con validación implícita y persistencia de datos
         ui.button("Finalizar", on_click=lambda: (
+                    form_data.update({
+                    'meses': meses.value,
+                    'clase': clase.value,
+                    'factores_coincidentes': factores_coincidentes.value,
+                    'porcentajeS': porcentajeS.value
+                }),
                     ui.notify("Por favor completa todos los campos obligatorios.", type="negative")
                     if not (factores_coincidentes.value and porcentajeS.value)
                     else asyncio.create_task(save_and_finish(meses.value, clase.value, factores_coincidentes.value, porcentajeS.value))
@@ -486,17 +492,17 @@ def show_pronostico():
         ui.label("Pronóstico generado").classes('text-2xl font-bold')
         #ui.label('El pronóstico del alumno '+str(form_data.get('nombreAlumno'))+' es: ').classes('mt-4')
         
-        if controller.generate_prediction() == 1:
-            pr = 'Excelente candidato'
+        if controller.get_pronostico() == 1:
+            pr = 'Excelente candidato ✅'
             bgcolor = '#eaf6eb'
-        elif controller.generate_prediction() == 2:
-            pr = 'Buen candidato'
+        elif controller.get_pronostico() == 2:
+            pr = 'Buen candidato ✔️✔️'
             bgcolor = '#ddeeff'
-        elif controller.generate_prediction() == 3:
-            pr = 'Candidato regular'
+        elif controller.get_pronostico() == 3:
+            pr = 'Candidato regular ✔️'
             bgcolor = '#fff2cc'
-        elif controller.generate_prediction() == 4:
-            pr = 'El candidato no cubre el perfil'
+        elif controller.get_pronostico() == 4:
+            pr = 'El candidato no cubre el perfil ❌'
             bgcolor = '#f8cecc'
         ui.add_head_html('''
         <style type="text/tailwindcss">
@@ -507,6 +513,84 @@ def show_pronostico():
         ''')
         ui.query('body').style(f'background-color: {bgcolor}')
         ui.html('<h2>El pronóstico del alumno(a) '+form_data.get('nombreAlumno')+' es: <b>"'+pr+'"</b></h2>')
+        columns = [
+                {'name': 'name', 'label': 'Nombre', 'field': 'name', 'required': True, 'align': 'left'},
+                {'name': 'factores_coincidentes', 'label': 'Factores Coincidentes', 'field': 'factores_coincidentes', 'sortable': True},
+                {'name': 'porcentajeS', 'label': 'Porcentaje de Similitud', 'field': 'porcentajeS', 'sortable': True},
+                {'name': 'pronostico', 'label': 'Pronóstico', 'field': 'pronostico', 'sortable': True},
+                {'name': 'sexo', 'label': 'Sexo', 'field': 'sexo', 'sortable': True},
+                {'name': 'edad', 'label': 'Edad', 'field': 'edad', 'sortable': True},
+                {'name': 'estado_civil', 'label': 'Estado Civil', 'field': 'estado_civil', 'sortable': True},
+                {'name': 'carrera', 'label': 'Carrera', 'field': 'carrera', 'sortable': True},
+                {'name': 'promedio', 'label': 'Promedio', 'field': 'promedio', 'sortable': True},
+                {'name': 'fp1', 'label': 'FP1', 'field': 'fp1', 'sortable': True},
+                {'name': 'factor1', 'label': 'Factor 1', 'field': 'factor1', 'sortable': True},
+                {'name': 'fp2', 'label': 'FP2', 'field': 'fp2', 'sortable': True},
+                {'name': 'factor2', 'label': 'Factor 2', 'field': 'factor2', 'sortable': True},
+                {'name': 'fp3', 'label': 'FP3', 'field': 'fp3', 'sortable': True},
+                {'name': 'factor3', 'label': 'Factor 3', 'field': 'factor3', 'sortable': True},
+                {'name': 'fp4', 'label': 'FP4', 'field': 'fp4', 'sortable': True},
+                {'name': 'factor4', 'label': 'Factor 4', 'field': 'factor4', 'sortable': True},
+                {'name': 'fp5', 'label': 'FP5', 'field': 'fp5', 'sortable': True},
+                {'name': 'factor5', 'label': 'Factor 5', 'field': 'factor5', 'sortable': True},
+                {'name': 'fp6', 'label': 'FP6', 'field': 'fp6', 'sortable': True},
+                {'name': 'factor6', 'label': 'Factor 6', 'field': 'factor6', 'sortable': True},
+                {'name': 'fp7', 'label': 'FP7', 'field': 'fp7', 'sortable': True},
+                {'name': 'factor7', 'label': 'Factor 7', 'field': 'factor7', 'sortable': True},
+                {'name': 'fp8', 'label': 'FP8', 'field': 'fp8', 'sortable': True},
+                {'name': 'factor8', 'label': 'Factor 8', 'field': 'factor8', 'sortable': True},
+                {'name': 'fp9', 'label': 'FP9', 'field': 'fp9', 'sortable': True},
+                {'name': 'factor9', 'label': 'Factor 9', 'field': 'factor9', 'sortable': True},
+                {'name': 'fp10', 'label': 'FP10', 'field': 'fp10', 'sortable': True},
+                {'name': 'factor10', 'label': 'Factor 10', 'field': 'factor10', 'sortable': True},
+                {'name': 'fp11', 'label': 'FP11', 'field': 'fp11', 'sortable': True},
+                {'name': 'factor11', 'label': 'Factor 11', 'field': 'factor11', 'sortable': True},
+                {'name': 'fp12', 'label': 'FP12', 'field': 'fp12', 'sortable': True},
+        ]
+        rows = [
+                {
+                    'name': form_data.get('nombreAlumno'),
+                    'factores_coincidentes': form_data.get('factores_coincidentes'),  # Ajuste aquí
+                    'porcentajeS': form_data.get('porcentajeS'),  # Ajuste aquí
+                    'pronostico': controller.get_pronostico(),
+                    'sexo': form_data.get('sexo_value'),
+                    'edad': form_data.get('edadAlumno'),
+                    'estado_civil': form_data.get('estado_civil_value'),
+                    'carrera': form_data.get('carrera'),
+                    'promedio': form_data.get('promedio'),
+                    'fp1': form_data.get('fp1'),
+                    'factor1': form_data.get('factor1'),
+                    'fp2': form_data.get('fp2'),
+                    'factor2': form_data.get('factor2'),
+                    'fp3': form_data.get('fp3'),
+                    'factor3': form_data.get('factor3'),
+                    'fp4': form_data.get('fp4'),
+                    'factor4': form_data.get('factor4'),
+                    'fp5': form_data.get('fp5'),
+                    'factor5': form_data.get('factor5'),
+                    'fp6': form_data.get('fp6'),
+                    'factor6': form_data.get('factor6'),
+                    'fp7': form_data.get('fp7'),
+                    'factor7': form_data.get('factor7'),
+                    'fp8': form_data.get('fp8'),
+                    'factor8': form_data.get('factor8'),
+                    'fp9': form_data.get('fp9'),
+                    'factor9': form_data.get('factor9'),
+                    'fp10': form_data.get('fp10'),
+                    'factor10': form_data.get('factor10'),
+                    'fp11': form_data.get('fp11'),
+                    'factor11': form_data.get('factor11'),
+                    'fp12': form_data.get('fp12'),
+                    'factor12': form_data.get('factor12'),
+                }
+        ]
+        
+        ui.table(
+            columns=columns,
+            rows=rows,
+            row_key='name'
+        ).classes('w-full').style('height: 400px; overflow: auto; display: block;')
+
 
 
 

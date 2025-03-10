@@ -5,6 +5,8 @@ from imblearn.over_sampling import SMOTE
 from sklearn.preprocessing import LabelEncoder
 from models.excel_model import ExcelModel
 
+pronostico = 0
+
 class FormController:
     def __init__(self, model, force_train=False):
         self.model = model
@@ -45,6 +47,7 @@ class FormController:
             print(f"❌ Error al guardar los datos: {e}")
 
     def generate_prediction(self):
+        global pronostico
         """Genera la predicción basada en los datos ingresados"""
         if self.loaded_model is None:
             print("❌ No se puede generar la predicción porque el modelo no se cargó correctamente.")
@@ -93,10 +96,11 @@ class FormController:
             self.model.save_data('RESULTADOS', self.step_data[6])
 
             print(f"✅ Pronóstico generado: {predicted_class}")
+            pronostico = predicted_class
 
         except Exception as e:
             print(f"❌ Error en la predicción: {e}")
-        return predicted_class
+        #return predicted_class
 
     def preprocess_dataset(self, df):
         """ Limpia el dataset eliminando texto y convirtiendo todo a numérico """
@@ -161,3 +165,6 @@ class FormController:
         model.save(self.model_path)
         print("✅ Modelo entrenado y guardado correctamente.")
         return model
+    
+    def get_pronostico(self):
+        return pronostico
