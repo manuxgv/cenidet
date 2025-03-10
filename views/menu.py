@@ -37,6 +37,7 @@ def get_last_id():
 # Variable global para controlar el paso del formulario
 step = 1
 pr = ""
+descripcion = ""
 bgcolor = ""
 
 @ui.page('/menu')
@@ -485,7 +486,7 @@ def show_sixth_step():
 
 # Mostrar el resultado
 def show_pronostico():
-    global pr, bgcolor
+    global pr, bgcolor, descripcion
     content_area.clear()
 
     with content_area:
@@ -495,15 +496,28 @@ def show_pronostico():
         if controller.get_pronostico() == 1:
             pr = 'Excelente candidato ✅'
             bgcolor = '#eaf6eb'
+            descripcion = "Este candidato tiene un pronóstico que sugiere que completará la carrera en un\n" \
+            "tiempo óptimo, cercano a los 2 años. Muestra un alto rendimiento, adaptabilidad y \n" \
+            "compromiso, lo que le permite sobresalir en su área de estudios."
         elif controller.get_pronostico() == 2:
             pr = 'Buen candidato ✔️✔️'
             bgcolor = '#ddeeff'
+            descripcion = "Este candidato tiene un pronóstico positivo, con la expectativa de terminar la\n" \
+            "carrera en un tiempo razonable, ligeramente superior a los 2 años. Aunque no destaca tanto \n" \
+            "como el candidato excelente, tiene un rendimiento sólido y una actitud comprometida con \nsu educación."
         elif controller.get_pronostico() == 3:
             pr = 'Candidato regular ✔️'
             bgcolor = '#fff2cc'
+            descripcion = "Este candidato muestra un rendimiento promedio, lo que sugiere que podría tardar\n" \
+            "más de 2 años en completar la carrera, pero es probable que termine en un plazo razonable.\n" \
+            "Necesitará más tiempo y esfuerzo para mejorar su desempeño y alcanzar los estándares más altos."
         elif controller.get_pronostico() == 4:
             pr = 'El candidato no cubre el perfil ❌'
             bgcolor = '#f8cecc'
+            descripcion = "Este candidato tiene un pronóstico desfavorable, lo que indica que podría\n" \
+            " tardar mucho más de 2 años en completar la carrera o incluso no terminarla.\n" \
+            "Su desempeño actual está por debajo de lo esperado y necesitará una gran intervención\n" \
+            "o un cambio de enfoque para mejorar sus resultados."
         ui.add_head_html('''
         <style type="text/tailwindcss">
             h2 {
@@ -546,6 +560,13 @@ def show_pronostico():
                 {'name': 'fp11', 'label': 'FP11', 'field': 'fp11', 'sortable': True},
                 {'name': 'factor11', 'label': 'Factor 11', 'field': 'factor11', 'sortable': True},
                 {'name': 'fp12', 'label': 'FP12', 'field': 'fp12', 'sortable': True},
+                {'name': 'factor13', 'label': 'Factor 13', 'field': 'factor13', 'sortable': True},
+                {'name': 'fp14', 'label': 'FP14', 'field': 'fp14', 'sortable': True},
+                {'name': 'factor14', 'label': 'Factor 14', 'field': 'factor14', 'sortable': True},
+                {'name': 'fp15', 'label': 'FP15', 'field': 'fp15', 'sortable': True},
+                {'name': 'factor15', 'label': 'Factor 15', 'field': 'factor15', 'sortable': True},
+                {'name': 'fp16', 'label': 'FP16', 'field': 'fp16', 'sortable': True},
+                {'name': 'factor16', 'label': 'Factor 16', 'field': 'factor16', 'sortable': True},
         ]
         rows = [
                 {
@@ -582,14 +603,27 @@ def show_pronostico():
                     'factor11': form_data.get('factor11'),
                     'fp12': form_data.get('fp12'),
                     'factor12': form_data.get('factor12'),
+                    'fp13': form_data.get('fp13'),
+                    'factor13': form_data.get('factor13'),
+                    'fp14': form_data.get('fp14'),
+                    'factor14': form_data.get('factor14'),
+                    'fp15': form_data.get('fp15'),
+                    'factor15': form_data.get('factor15'),
+                    'fp16': form_data.get('fp16'),
+                    'factor16': form_data.get('factor16'),
                 }
         ]
-        
-        ui.table(
-            columns=columns,
-            rows=rows,
-            row_key='name'
-        ).classes('w-full').style('height: 400px; overflow: auto; display: block;')
+        with ui.scroll_area().classes('w-[1150px] h-[180px] border'):
+                ui.table(
+                    columns=columns,
+                    rows=rows,
+                    row_key='name',
+                )
+        ui.chat_message(descripcion,
+                name='CENIDET',
+                stamp='now',
+                avatar='https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQUxIG3GBrQ41JVQ40hTe4XJrtR39qiw3Mdbg&s')
+
 
 
 
