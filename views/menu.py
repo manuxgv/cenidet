@@ -5,6 +5,11 @@ from openpyxl import load_workbook
 from controllers.controller import FormController
 from models.excel_model import ExcelModel
 import asyncio
+from pyecharts.charts import Bar
+from pyecharts.commons.utils import JsCode
+from pyecharts.options import AxisOpts, ItemStyleOpts
+from random import random
+
 
 
 # Instancia del modelo y el controlador
@@ -41,6 +46,7 @@ step = 1
 pr = ""
 descripcion = ""
 bgcolor = ""
+pronosticos_grafica = []
 
 @ui.page('/menu')
 def show_menu():
@@ -61,6 +67,7 @@ def show_menu():
             content_area_label = ui.label("").classes('mt-6')  # Aquí se actualizará el contenido dinámico
 
 def show_levels():
+    global pronosticos_grafica
     print(controller.get_all_sheets())
 
     alumnos_data = controller.get_sheet_data('ALUMNOS')
@@ -68,6 +75,7 @@ def show_levels():
     calificaciones_data = controller.get_sheet_data('CALIFICACIONES')
     materias_data = controller.get_sheet_data('MATERIAS')
     sixteenfp_data = controller.get_sheet_data('16FP')
+    resultados_data = controller.get_sheet_data('RESULTADOS')
 
     # Construir correctamente las filas con id y nombre
     rows = [{'id': alumno['ID'], 'nombre': alumno['NOMBRE'], 'sexo': alumno['SEXO'], 'edad': alumno['EDAD'], 'entidad': alumno['ENTIDAD FEDERATIVA'],
@@ -95,6 +103,9 @@ def show_levels():
                     'fp12': fp['FP12'], 'factor12': fp['Factor12'], 'fp13': fp['FP13'], 'factor13': fp['Factor13'], 'fp14': fp['FP14'], 'factor14': fp['Factor14'],
                     'fp15': fp['FP15'], 'factor15': fp['Factor15'], 'fp16': fp['FP16'], 'factor16': fp['Factor16'],
                  } for fp in sixteenfp_data]
+
+    rowsresultados = [{'meses': resultadosfp['MESES'], 'clase': resultadosfp['CLASE'], 'factoresc': resultadosfp['FACTORES COINCIDENTES'],
+                       'porcentajesim': resultadosfp['PORCENTAJE DE SIMILITUD'], 'pronostico': resultadosfp['PRONOSTICO']} for resultadosfp in resultados_data]
 
     for i in range(len(rows)):
         rows[i]['tesis'] = rowscarrera[i]['tesis']
@@ -161,19 +172,27 @@ def show_levels():
         rows[i]['factor15'] = rows16fp[i]['factor15']
         rows[i]['fp16'] = rows16fp[i]['fp16']
         rows[i]['factor16'] = rows16fp[i]['factor16']
-
+        rows[i]['meses'] = rowsresultados[i]['meses']
+        rows[i]['clase'] = rowsresultados[i]['clase']
+        rows[i]['factores'] = rowsresultados[i]['factoresc']
+        rows[i]['porcentaje'] = rowsresultados[i]['porcentajesim']
+        pronosticos_grafica.append(rowsresultados[i]['pronostico'])
+        rows[i]['pronostico'] = rowsresultados[i]['pronostico']
+    #print(pronosticos_grafica)
+    
   
     #carrerarows = [{'tesis': carrera['TESIS']} for carrera in carrera_data]
 
     content_area.clear()
     with content_area:
         ui.label("Panel de control").classes('text-2xl font-bold')
-        ui.label("Tabla de alumnos:").classes('text-1xl font-bold')
+        ui.label("Base de datos MCC:").classes('text-1xl font-bold')
         with ui.scroll_area().classes('w-[1150px] h-[400px]'):
             table = ui.table(
                 columns=[
                     {'name': 'id', 'label': 'ID', 'field': 'id', 'align': 'left', 'sortable': False},
                     {'name': 'nombre', 'label': 'NOMBRE', 'field': 'nombre', 'align': 'left', 'sortable': False},
+                    {'name': 'pronostico', 'label': 'PRONÓSTICO', 'field': 'pronostico', 'align': 'left', 'sortable': True},
                     {'name': 'sexo', 'label': 'SEXO', 'field': 'sexo', 'align': 'left', 'sortable': False},
                     {'name': 'edad', 'label': 'EDAD', 'field': 'edad', 'align': 'left', 'sortable': False},
                     {'name': 'entidad', 'label': 'ENTIDAD FEDERATIVA', 'field': 'entidad', 'align': 'left', 'sortable': False},
@@ -242,12 +261,76 @@ def show_levels():
                     {'name': 'factor15', 'label': 'FACTOR15', 'field': 'factor15', 'align': 'left', 'sortable': True},
                     {'name': 'fp16', 'label': 'FP16', 'field': 'fp16', 'align': 'left', 'sortable': True},
                     {'name': 'factor16', 'label': 'FACTOR16', 'field': 'factor16', 'align': 'left', 'sortable': True},
+                    {'name': 'meses', 'label': 'MESES', 'field': 'meses', 'align': 'left', 'sortable': True},
+                    {'name': 'clase', 'label': 'CLASE', 'field': 'clase', 'align': 'left', 'sortable': True},
+                    {'name': 'factores', 'label': 'FACTORES COINCIDENTES', 'field': 'factores', 'align': 'left', 'sortable': True},
+                    {'name': 'porcentaje', 'label': 'PORCENTAJE DE SIMILITUD', 'field': 'porcentaje', 'align': 'left', 'sortable': True},
                 ],
                 rows=rows,  # Ahora cada fila tiene un ID y un NOMBRE correctamente
                 row_key='id',
                 pagination=5,
             )
         ui.input('Filtrar').bind_value(table, 'filter')
+
+        ui.separator()
+
+        ui.label("Gráfica de categorías:").classes('text-1xl font-bold')
+        with ui.row().classes('w-full mb-2'):
+            
+            # Crear la gráfica de barras con colores personalizados
+            chart = (
+                Bar()
+                .add_xaxis(['Pronósticos MCC'])  # Los valores del eje X
+                .add_yaxis(
+                    'Excelente',  # Nombre de la categoría
+                    [pronosticos_grafica.count(1)],  # Datos
+                    itemstyle_opts={
+                        'color': 'green'  # Color de las barras
+                    }
+                )
+                .add_yaxis(
+                    'Bueno',
+                    [pronosticos_grafica.count(2)],
+                    itemstyle_opts={
+                        'color': 'blue'
+                    }
+                )
+                .add_yaxis(
+                    'Regular',
+                    [pronosticos_grafica.count(3)],
+                    itemstyle_opts={
+                        'color': 'yellow'
+                    }
+                )
+                .add_yaxis(
+                    'Malo',
+                    [pronosticos_grafica.count(4)],
+                    itemstyle_opts={
+                        'color': 'red'
+                    }
+                )
+                .set_global_opts(
+                    xaxis_opts={'axislabel_opts': {'formatter': JsCode(r'(val, idx) => `Grupo ${val}`')}},
+                    yaxis_opts={'axislabel_opts': {'formatter': JsCode(r'(val, idx) => `${val}%`')}},
+                )
+            )
+
+
+            # Renderizar en NiceGUI
+            ui.echart.from_pyecharts(chart).classes('w-full w-[500px] h-[400px]')
+
+            
+            ui.echart({
+            'xAxis': {'type': 'value'},
+            'yAxis': {'type': 'category', 'data': ['A', 'B'], 'inverse': True},
+            'legend': {'textStyle': {'color': 'gray'}},
+            'series': [
+                {'type': 'bar', 'name': 'Alpha', 'data': [0.1, 0.2]},
+                {'type': 'bar', 'name': 'Beta', 'data': [0.3, 0.4]},
+            ],
+        }).classes('w-full w-[500px] h-[400px]')
+            
+
 
 
 def show_campus():
