@@ -168,3 +168,20 @@ class FormController:
     
     def get_pronostico(self):
         return pronostico
+    
+
+    #MARTES
+    def get_all_sheets(self):
+        """Obtiene los nombres de todas las hojas del archivo Excel."""
+        return self.model.get_all_sheets()
+
+    def get_sheet_data(self, sheet_name):
+        """Obtiene los datos de una hoja específica del Excel en formato de lista de diccionarios."""
+        return self.model.get_sheet_data(sheet_name)
+
+    '''def save_data(self, sheet_name, data):
+        """Guarda datos en una hoja específica del Excel."""
+        self.model.save_data(sheet_name, data)'''
+
+
+

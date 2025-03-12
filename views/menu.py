@@ -13,6 +13,8 @@ controller = FormController(excel_model)
 
 
 
+
+
 # Función para obtener el último ID de la hoja "ALUMNOS"
 def get_last_id():
     file_path = "models/BD MCC.xlsx"  # Asegurar la ruta correcta
@@ -59,7 +61,194 @@ def show_menu():
             content_area_label = ui.label("").classes('mt-6')  # Aquí se actualizará el contenido dinámico
 
 def show_levels():
-    ui.notify("Mostrando Niveles Escolares")
+    print(controller.get_all_sheets())
+
+    alumnos_data = controller.get_sheet_data('ALUMNOS')
+    carrera_data = controller.get_sheet_data('CARRERA')
+    calificaciones_data = controller.get_sheet_data('CALIFICACIONES')
+    materias_data = controller.get_sheet_data('MATERIAS')
+    sixteenfp_data = controller.get_sheet_data('16FP')
+
+    # Construir correctamente las filas con id y nombre
+    rows = [{'id': alumno['ID'], 'nombre': alumno['NOMBRE'], 'sexo': alumno['SEXO'], 'edad': alumno['EDAD'], 'entidad': alumno['ENTIDAD FEDERATIVA'],
+                'estado_civil': alumno['ESTADO CIVIL'],
+             } for alumno in alumnos_data]
+    
+    rowscarrera = [{'tesis': carrera['TESIS'], 'carrera': carrera['CARRERA'], 'linea': carrera['LINEA'], 'generacion': f"{carrera['GENERA5ON'].year}-{carrera['GENERA5ON'].month}",
+                    'semestre': carrera['SEMESTRE'], 'promedio': carrera['PROMEDIO'], 'creditos': carrera['CREDITOS 1S'], 'terminacion': carrera['TERMINACION']
+                    } for carrera in carrera_data]
+    
+    rowscalificaciones = [{'p1': calificaciones['PROM. S 1'], 'C1': calificaciones['CREDITOS CURSADOS'], 'p2': calificaciones['PROM. S 2'], 'C2': calificaciones['CREDITOS CURSADOS2'],
+                    'p3': calificaciones['PROM. SEM 3'], 'C3': calificaciones['CREDITOS CURSADOS3'], 'p4': calificaciones['PROM. S 4'], 'C4': calificaciones['CREDITOS CURSADOS4'],
+                    'p5': calificaciones['PROM. S 5'], 'C5': calificaciones['CREDITOS CURSADOS5'], 'p6': calificaciones['PROM. SEM 6'], 'C6': calificaciones['CREDITOS CURSADOS6'],
+                           } for calificaciones in calificaciones_data]
+    
+    rowsmaterias = [{'b1': materias['B1'], 'b2': materias['B2'], 'b3': materias['B3'], 'b4': materias['B4'],
+                    'o1': materias['O1'], 'o2': materias['O2'], 'o3': materias['O3'], 'o4': materias['O4'], 'o5': materias['O5'],
+                    's1': materias['S1'], 's2': materias['S2'], 's3': materias['S3'],
+                     } for materias in materias_data]
+    
+    rows16fp = [{'fp1': fp['FP1'], 'factor1': fp['Factor1'], 'fp2': fp['FP2'], 'factor2': fp['Factor 2'], 'fp3': fp['FP3'],
+                 'factor3': fp['Factor3'], 'fp4': fp['FP4'], 'factor4': fp['Factor4'], 'fp5': fp['FP5'], 'factor5': fp['Factor5'],
+                 'fp6': fp['FP6'], 'factor6': fp['Factor6'], 'fp7': fp['FP7'], 'factor7': fp['Factor7'], 'fp8': fp['FP8'], 'factor8': fp['Factor8'],
+                    'fp9': fp['FP9'], 'factor9': fp['Factor9'], 'fp10': fp['FP10'], 'factor10': fp['Factor10'], 'fp11': fp['FP11'], 'factor11': fp['Factor11'],
+                    'fp12': fp['FP12'], 'factor12': fp['Factor12'], 'fp13': fp['FP13'], 'factor13': fp['Factor13'], 'fp14': fp['FP14'], 'factor14': fp['Factor14'],
+                    'fp15': fp['FP15'], 'factor15': fp['Factor15'], 'fp16': fp['FP16'], 'factor16': fp['Factor16'],
+                 } for fp in sixteenfp_data]
+
+    for i in range(len(rows)):
+        rows[i]['tesis'] = rowscarrera[i]['tesis']
+        rows[i]['carrera'] = rowscarrera[i]['carrera']
+        rows[i]['linea'] = rowscarrera[i]['linea']
+        rows[i]['generacion'] = rowscarrera[i]['generacion']
+        rows[i]['semestre'] = rowscarrera[i]['semestre']
+        rows[i]['promedio'] = rowscarrera[i]['promedio']
+        rows[i]['creditos'] = rowscarrera[i]['creditos']
+        rows[i]['terminacion'] = rowscarrera[i]['terminacion']
+        rows[i]['p1'] = rowscalificaciones[i]['p1']
+        rows[i]['C1'] = rowscalificaciones[i]['C1']
+        rows[i]['p2'] = rowscalificaciones[i]['p2']
+        rows[i]['C2'] = rowscalificaciones[i]['C2']
+        rows[i]['p3'] = rowscalificaciones[i]['p3']
+        rows[i]['C3'] = rowscalificaciones[i]['C3']
+        rows[i]['p4'] = rowscalificaciones[i]['p4']
+        rows[i]['C4'] = rowscalificaciones[i]['C4']
+        rows[i]['p5'] = rowscalificaciones[i]['p5']
+        rows[i]['C5'] = rowscalificaciones[i]['C5']
+        rows[i]['p6'] = rowscalificaciones[i]['p6']
+        rows[i]['C6'] = rowscalificaciones[i]['C6']
+        rows[i]['b1'] = rowsmaterias[i]['b1']
+        rows[i]['b2'] = rowsmaterias[i]['b2']
+        rows[i]['b3'] = rowsmaterias[i]['b3']
+        rows[i]['b4'] = rowsmaterias[i]['b4']
+        rows[i]['o1'] = rowsmaterias[i]['o1']
+        rows[i]['o2'] = rowsmaterias[i]['o2']
+        rows[i]['o3'] = rowsmaterias[i]['o3']
+        rows[i]['o4'] = rowsmaterias[i]['o4']
+        rows[i]['o5'] = rowsmaterias[i]['o5']
+        rows[i]['s1'] = rowsmaterias[i]['s1']
+        rows[i]['s2'] = rowsmaterias[i]['s2']
+        rows[i]['s3'] = rowsmaterias[i]['s3']
+        rows[i]['fp1'] = rows16fp[i]['fp1']
+        rows[i]['factor1'] = rows16fp[i]['factor1']
+        rows[i]['fp2'] = rows16fp[i]['fp2']
+        rows[i]['factor2'] = rows16fp[i]['factor2']
+        rows[i]['fp3'] = rows16fp[i]['fp3']
+        rows[i]['factor3'] = rows16fp[i]['factor3']
+        rows[i]['fp4'] = rows16fp[i]['fp4']
+        rows[i]['factor4'] = rows16fp[i]['factor4']
+        rows[i]['fp5'] = rows16fp[i]['fp5']
+        rows[i]['factor5'] = rows16fp[i]['factor5']
+        rows[i]['fp6'] = rows16fp[i]['fp6']
+        rows[i]['factor6'] = rows16fp[i]['factor6']
+        rows[i]['fp7'] = rows16fp[i]['fp7']
+        rows[i]['factor7'] = rows16fp[i]['factor7']
+        rows[i]['fp8'] = rows16fp[i]['fp8']
+        rows[i]['factor8'] = rows16fp[i]['factor8']
+        rows[i]['fp9'] = rows16fp[i]['fp9']
+        rows[i]['factor9'] = rows16fp[i]['factor9']
+        rows[i]['fp10'] = rows16fp[i]['fp10']
+        rows[i]['factor10'] = rows16fp[i]['factor10']
+        rows[i]['fp11'] = rows16fp[i]['fp11']
+        rows[i]['factor11'] = rows16fp[i]['factor11']
+        rows[i]['fp12'] = rows16fp[i]['fp12']
+        rows[i]['factor12'] = rows16fp[i]['factor12']
+        rows[i]['fp13'] = rows16fp[i]['fp13']
+        rows[i]['factor13'] = rows16fp[i]['factor13']
+        rows[i]['fp14'] = rows16fp[i]['fp14']
+        rows[i]['factor14'] = rows16fp[i]['factor14']
+        rows[i]['fp15'] = rows16fp[i]['fp15']
+        rows[i]['factor15'] = rows16fp[i]['factor15']
+        rows[i]['fp16'] = rows16fp[i]['fp16']
+        rows[i]['factor16'] = rows16fp[i]['factor16']
+
+  
+    #carrerarows = [{'tesis': carrera['TESIS']} for carrera in carrera_data]
+
+    content_area.clear()
+    with content_area:
+        ui.label("Panel de control").classes('text-2xl font-bold')
+        ui.label("Tabla de alumnos:").classes('text-1xl font-bold')
+        with ui.scroll_area().classes('w-[1150px] h-[400px]'):
+            table = ui.table(
+                columns=[
+                    {'name': 'id', 'label': 'ID', 'field': 'id', 'align': 'left', 'sortable': False},
+                    {'name': 'nombre', 'label': 'NOMBRE', 'field': 'nombre', 'align': 'left', 'sortable': False},
+                    {'name': 'sexo', 'label': 'SEXO', 'field': 'sexo', 'align': 'left', 'sortable': False},
+                    {'name': 'edad', 'label': 'EDAD', 'field': 'edad', 'align': 'left', 'sortable': False},
+                    {'name': 'entidad', 'label': 'ENTIDAD FEDERATIVA', 'field': 'entidad', 'align': 'left', 'sortable': False},
+                    {'name': 'estado_civil', 'label': 'ESTADO CIVIL', 'field': 'estado_civil', 'align': 'left', 'sortable': True},
+                    {'name': 'tesis', 'label': 'TESIS', 'field': 'tesis', 'align': 'left', 'sortable': True},
+                    {'name': 'carrera', 'label': 'CARRERA', 'field': 'carrera', 'align': 'left', 'sortable': True},
+                    {'name': 'linea', 'label': 'LINEA', 'field': 'linea', 'align': 'left', 'sortable': True},
+                    {'name': 'generacion', 'label': 'GENERACIÓN', 'field': 'generacion', 'align': 'left', 'sortable': True},
+                    {'name': 'semestre', 'label': 'SEMESTRE', 'field': 'semestre', 'align': 'left', 'sortable': True},
+                    {'name': 'promedio', 'label': 'PROMEDIO', 'field': 'promedio', 'align': 'left', 'sortable': True},
+                    {'name': 'creditos', 'label': 'CRÉDITOS', 'field': 'creditos', 'align': 'left', 'sortable': True},
+                    {'name': 'terminacion', 'label': 'TERMINACIÓN', 'field': 'terminacion', 'align': 'left', 'sortable': True},
+                    {'name': 'p1', 'label': 'PROMEDIO S1', 'field': 'p1', 'align': 'left', 'sortable': True},
+                    {'name': 'C1', 'label': 'CRÉDITOS CURSADOS', 'field': 'C1', 'align': 'left', 'sortable': True},
+                    {'name': 'p2', 'label': 'PROMEDIO S2', 'field': 'p2', 'align': 'left', 'sortable': True},
+                    {'name': 'C2', 'label': 'CRÉDITOS CURSADOS', 'field': 'C2', 'align': 'left', 'sortable': True},
+                    {'name': 'p3', 'label': 'PROMEDIO S3', 'field': 'p3', 'align': 'left', 'sortable': True},
+                    {'name': 'C3', 'label': 'CRÉDITOS CURSADOS', 'field': 'C3', 'align': 'left', 'sortable': True},
+                    {'name': 'p4', 'label': 'PROMEDIO S4', 'field': 'p4', 'align': 'left', 'sortable': True},
+                    {'name': 'C4', 'label': 'CRÉDITOS CURSADOS', 'field': 'C4', 'align': 'left', 'sortable': True},
+                    {'name': 'p5', 'label': 'PROMEDIO S5', 'field': 'p5', 'align': 'left', 'sortable': True},
+                    {'name': 'C5', 'label': 'CRÉDITOS CURSADOS', 'field': 'C5', 'align': 'left', 'sortable': True},
+                    {'name': 'p6', 'label': 'PROMEDIO S6', 'field': 'p6', 'align': 'left', 'sortable': True},
+                    {'name': 'C6', 'label': 'CRÉDITOS CURSADOS', 'field': 'C6', 'align': 'left', 'sortable': True},
+                    {'name': 'b1', 'label': 'B1', 'field': 'b1', 'align': 'left', 'sortable': True},
+                    {'name': 'b2', 'label': 'B2', 'field': 'b2', 'align': 'left', 'sortable': True},
+                    {'name': 'b3', 'label': 'B3', 'field': 'b3', 'align': 'left', 'sortable': True},
+                    {'name': 'b4', 'label': 'B4', 'field': 'b4', 'align': 'left', 'sortable': True},
+                    {'name': 'o1', 'label': 'O1', 'field': 'o1', 'align': 'left', 'sortable': True},
+                    {'name': 'o2', 'label': 'O2', 'field': 'o2', 'align': 'left', 'sortable': True},
+                    {'name': 'o3', 'label': 'O3', 'field': 'o3', 'align': 'left', 'sortable': True},
+                    {'name': 'o4', 'label': 'O4', 'field': 'o4', 'align': 'left', 'sortable': True},
+                    {'name': 'o5', 'label': 'O5', 'field': 'o5', 'align': 'left', 'sortable': True},
+                    {'name': 's1', 'label': 'S1', 'field': 's1', 'align': 'left', 'sortable': True},
+                    {'name': 's2', 'label': 'S2', 'field': 's2', 'align': 'left', 'sortable': True},
+                    {'name': 's3', 'label': 'S3', 'field': 's3', 'align': 'left', 'sortable': True},
+                    {'name': 'fp1', 'label': 'FP1', 'field': 'fp1', 'align': 'left', 'sortable': True},
+                    {'name': 'factor1', 'label': 'FACTOR1', 'field': 'factor1', 'align': 'left', 'sortable': True},
+                    {'name': 'fp2', 'label': 'FP2', 'field': 'fp2', 'align': 'left', 'sortable': True},
+                    {'name': 'factor2', 'label': 'FACTOR2', 'field': 'factor2', 'align': 'left', 'sortable': True},
+                    {'name': 'fp3', 'label': 'FP3', 'field': 'fp3', 'align': 'left', 'sortable': True},
+                    {'name': 'factor3', 'label': 'FACTOR3', 'field': 'factor3', 'align': 'left', 'sortable': True},
+                    {'name': 'fp4', 'label': 'FP4', 'field': 'fp4', 'align': 'left', 'sortable': True},
+                    {'name': 'factor4', 'label': 'FACTOR4', 'field': 'factor4', 'align': 'left', 'sortable': True},
+                    {'name': 'fp5', 'label': 'FP5', 'field': 'fp5', 'align': 'left', 'sortable': True},
+                    {'name': 'factor5', 'label': 'FACTOR5', 'field': 'factor5', 'align': 'left', 'sortable': True},
+                    {'name': 'fp6', 'label': 'FP6', 'field': 'fp6', 'align': 'left', 'sortable': True},
+                    {'name': 'factor6', 'label': 'FACTOR6', 'field': 'factor6', 'align': 'left', 'sortable': True},
+                    {'name': 'fp7', 'label': 'FP7', 'field': 'fp7', 'align': 'left', 'sortable': True},
+                    {'name': 'factor7', 'label': 'FACTOR7', 'field': 'factor7', 'align': 'left', 'sortable': True},
+                    {'name': 'fp8', 'label': 'FP8', 'field': 'fp8', 'align': 'left', 'sortable': True},
+                    {'name': 'factor8', 'label': 'FACTOR8', 'field': 'factor8', 'align': 'left', 'sortable': True},
+                    {'name': 'fp9', 'label': 'FP9', 'field': 'fp9', 'align': 'left', 'sortable': True},
+                    {'name': 'factor9', 'label': 'FACTOR9', 'field': 'factor9', 'align': 'left', 'sortable': True},
+                    {'name': 'fp10', 'label': 'FP10', 'field': 'fp10', 'align': 'left', 'sortable': True},
+                    {'name': 'factor10', 'label': 'FACTOR10', 'field': 'factor10', 'align': 'left', 'sortable': True},
+                    {'name': 'fp11', 'label': 'FP11', 'field': 'fp11', 'align': 'left', 'sortable': True},
+                    {'name': 'factor11', 'label': 'FACTOR11', 'field': 'factor11', 'align': 'left', 'sortable': True},
+                    {'name': 'fp12', 'label': 'FP12', 'field': 'fp12', 'align': 'left', 'sortable': True},
+                    {'name': 'factor12', 'label': 'FACTOR12', 'field': 'factor12', 'align': 'left', 'sortable': True},
+                    {'name': 'fp13', 'label': 'FP13', 'field': 'fp13', 'align': 'left', 'sortable': True},
+                    {'name': 'factor13', 'label': 'FACTOR13', 'field': 'factor13', 'align': 'left', 'sortable': True},
+                    {'name': 'fp14', 'label': 'FP14', 'field': 'fp14', 'align': 'left', 'sortable': True},
+                    {'name': 'factor14', 'label': 'FACTOR14', 'field': 'factor14', 'align': 'left', 'sortable': True},
+                    {'name': 'fp15', 'label': 'FP15', 'field': 'fp15', 'align': 'left', 'sortable': True},
+                    {'name': 'factor15', 'label': 'FACTOR15', 'field': 'factor15', 'align': 'left', 'sortable': True},
+                    {'name': 'fp16', 'label': 'FP16', 'field': 'fp16', 'align': 'left', 'sortable': True},
+                    {'name': 'factor16', 'label': 'FACTOR16', 'field': 'factor16', 'align': 'left', 'sortable': True},
+                ],
+                rows=rows,  # Ahora cada fila tiene un ID y un NOMBRE correctamente
+                row_key='id',
+                pagination=5,
+            )
+        ui.input('Filtrar').bind_value(table, 'filter')
+
 
 def show_campus():
     ui.notify("Mostrando Campus o Sedes")
@@ -622,9 +811,9 @@ def show_pronostico():
         ui.chat_message(descripcion,
                 name='CENIDET',
                 stamp='now',
-                avatar='https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQUxIG3GBrQ41JVQ40hTe4XJrtR39qiw3Mdbg&s')
+                avatar='https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT24R5b6A7RR3BFQvhOmjFMsxHIdNagDyQVjQ&s')
 
-
+        ui.button("Volver al inicio", on_click=lambda:(ui.navigate.to('/menu'))).classes('mt-2')
 
 
 

@@ -6,6 +6,22 @@ class ExcelModel:
     def __init__(self, file_path):
         self.file_path = file_path
 
+#Esto se hizo el martes
+    def get_all_sheets(self):
+        """Obtiene los nombres de todas las hojas del archivo Excel."""
+        try:
+            xls = pd.ExcelFile(self.file_path)
+            return xls.sheet_names
+        except Exception as e:
+            print(f'Error al obtener hojas del Excel: {e}')
+            return []
+        
+    def get_sheet_data(self, sheet_name):
+            """Devuelve los datos de una hoja en formato de lista de diccionarios."""
+            df = self.get_sheet(sheet_name)
+            return df.to_dict(orient='records') if not df.empty else []
+
+#esto antes
     def get_sheet(self, sheet_name):
         # Cargar el archivo Excel y devolver la hoja deseada
         return pd.read_excel(self.file_path, sheet_name=sheet_name)
