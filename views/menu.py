@@ -18,6 +18,14 @@ controller = FormController(excel_model)
 
 
 
+ui.add_head_html("""
+    <style>
+        .nicegui-content .chat-message .content {
+            background-color: #FFD700 !important; /* Amarillo */
+            color: black !important;
+        }
+    </style>
+""")
 
 
 # Función para obtener el último ID de la hoja "ALUMNOS"
@@ -47,6 +55,7 @@ pr = ""
 descripcion = ""
 bgcolor = ""
 pronosticos_grafica = []
+pronosticos_graficaDCC = []
 
 @ui.page('/menu')
 def show_menu():
@@ -76,6 +85,7 @@ def show_levels():
     materias_data = controller.get_sheet_data('MATERIAS')
     sixteenfp_data = controller.get_sheet_data('16FP')
     resultados_data = controller.get_sheet_data('RESULTADOS')
+    resultados_dataDCC = controller.get_sheet_dataDCC('RESULTADOS')
 
     # Construir correctamente las filas con id y nombre
     rows = [{'id': alumno['ID'], 'nombre': alumno['NOMBRE'], 'sexo': alumno['SEXO'], 'edad': alumno['EDAD'], 'entidad': alumno['ENTIDAD FEDERATIVA'],
@@ -178,7 +188,7 @@ def show_levels():
         rows[i]['porcentaje'] = rowsresultados[i]['porcentajesim']
         pronosticos_grafica.append(rowsresultados[i]['pronostico'])
         rows[i]['pronostico'] = rowsresultados[i]['pronostico']
-    #print(pronosticos_grafica)
+    #print((resultados_dataDCC['PRONOSTICO'] == 3).sum())
     
   
     #carrerarows = [{'tesis': carrera['TESIS']} for carrera in carrera_data]
@@ -280,7 +290,7 @@ def show_levels():
             # Crear la gráfica de barras con colores personalizados
             chart = (
                 Bar()
-                .add_xaxis(['Pronósticos MCC'])  # Los valores del eje X
+                .add_xaxis(['Alumnos MCC'])  # Los valores del eje X
                 .add_yaxis(
                     'Excelente',  # Nombre de la categoría
                     [pronosticos_grafica.count(1)],  # Datos
@@ -322,11 +332,11 @@ def show_levels():
             
             ui.echart({
             'xAxis': {'type': 'value'},
-            'yAxis': {'type': 'category', 'data': ['A', 'B'], 'inverse': True},
+            'yAxis': {'type': 'category', 'data': ['1', '2', '3', '4'], 'inverse': True},
             'legend': {'textStyle': {'color': 'gray'}},
             'series': [
-                {'type': 'bar', 'name': 'Alpha', 'data': [0.1, 0.2]},
-                {'type': 'bar', 'name': 'Beta', 'data': [0.3, 0.4]},
+                {'type': 'bar', 'name': 'MCC', 'data': [pronosticos_grafica.count(1), pronosticos_grafica.count(2), pronosticos_grafica.count(3), pronosticos_grafica.count(4)]},
+                {'type': 'bar', 'name': 'DCC', 'data': [(resultados_dataDCC['PRONOSTICO'] == 1).sum(), (resultados_dataDCC['PRONOSTICO'] == 2).sum(), (resultados_dataDCC['PRONOSTICO'] == 3).sum(), (resultados_dataDCC['PRONOSTICO'] == 4).sum()]},
             ],
         }).classes('w-full w-[500px] h-[400px]')
             
@@ -762,6 +772,7 @@ def show_pronostico():
     content_area.clear()
 
     with content_area:
+
         ui.label("Pronóstico generado").classes('text-2xl font-bold')
         #ui.label('El pronóstico del alumno '+str(form_data.get('nombreAlumno'))+' es: ').classes('mt-4')
         

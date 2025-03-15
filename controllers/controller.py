@@ -151,7 +151,7 @@ class FormController:
         model = tf.keras.Sequential([
             tf.keras.layers.Dense(128, activation='relu', input_shape=(X_train.shape[1],)),
             tf.keras.layers.Dense(64, activation='relu'),
-            tf.keras.layers.Dense(1, activation='sigmoid')  # Ajusta la salida para clasificación binaria
+            tf.keras.layers.Dense(1, activation='sigmoid')
         ])
 
         # Compilar el modelo
@@ -178,6 +178,10 @@ class FormController:
     def get_sheet_data(self, sheet_name):
         """Obtiene los datos de una hoja específica del Excel en formato de lista de diccionarios."""
         return self.model.get_sheet_data(sheet_name)
+    
+    def get_sheet_dataDCC(self, sheet_name):
+        """Obtiene los datos de una hoja específica del Excel en formato de lista de diccionarios."""
+        return self.model.get_sheetDCC(sheet_name)
 
     '''def save_data(self, sheet_name, data):
         """Guarda datos en una hoja específica del Excel."""

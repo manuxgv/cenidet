@@ -5,6 +5,7 @@ from openpyxl import load_workbook
 class ExcelModel:
     def __init__(self, file_path):
         self.file_path = file_path
+        self.dcc_path = 'models/BD DCC.xlsx'
 
 #Esto se hizo el martes
     def get_all_sheets(self):
@@ -25,6 +26,13 @@ class ExcelModel:
     def get_sheet(self, sheet_name):
         # Cargar el archivo Excel y devolver la hoja deseada
         return pd.read_excel(self.file_path, sheet_name=sheet_name)
+    
+
+#esto viernes
+    def get_sheetDCC(self, sheet_name):
+        # Cargar el archivo Excel y devolver la hoja deseada
+        return pd.read_excel(self.dcc_path, sheet_name=sheet_name)
+
 
     def save_data(self, sheet_name, data):
         # Cargar el archivo Excel
