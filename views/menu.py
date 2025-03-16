@@ -1,6 +1,7 @@
 from nicegui import ui
 import pandas as pd
 import os
+import openpyxl
 from openpyxl import load_workbook
 from controllers.controller import FormController
 from models.excel_model import ExcelModel
@@ -9,6 +10,9 @@ from pyecharts.charts import Bar
 from pyecharts.commons.utils import JsCode
 from pyecharts.options import AxisOpts, ItemStyleOpts
 from random import random
+import subprocess
+
+
 
 
 
@@ -18,14 +22,6 @@ controller = FormController(excel_model)
 
 
 
-ui.add_head_html("""
-    <style>
-        .nicegui-content .chat-message .content {
-            background-color: #FFD700 !important; /* Amarillo */
-            color: black !important;
-        }
-    </style>
-""")
 
 
 # Función para obtener el último ID de la hoja "ALUMNOS"
@@ -56,6 +52,8 @@ descripcion = ""
 bgcolor = ""
 pronosticos_grafica = []
 pronosticos_graficaDCC = []
+visible_columns = []
+
 
 @ui.page('/menu')
 def show_menu():
@@ -75,6 +73,25 @@ def show_menu():
             ui.label("Bienvenido al sistema").classes('text-2xl font-bold')
             content_area_label = ui.label("").classes('mt-6')  # Aquí se actualizará el contenido dinámico
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 def show_levels():
     global pronosticos_grafica
     print(controller.get_all_sheets())
@@ -87,10 +104,166 @@ def show_levels():
     resultados_data = controller.get_sheet_data('RESULTADOS')
     resultados_dataDCC = controller.get_sheet_dataDCC('RESULTADOS')
 
+
+    def abrir_excel():
+        ruta_excel = "C:/Users/mane-/OneDrive/Escritorio/PROGRAMA/models/BD MCC.xlsx"  # Ruta del archivo Excel
+
+        # Verificar si el archivo existe antes de abrirlo
+        if not os.path.exists(ruta_excel):
+            ui.notify("Archivo no encontrado.", type="negative")
+            return
+
+        try:
+            # Intentar abrir el archivo con la aplicación predeterminada
+            subprocess.Popen(['start', ruta_excel], shell=True)
+
+            # Leer solo las primeras 5 filas para evitar mucha información
+            wb = openpyxl.load_workbook(ruta_excel)  # Cargar el archivo Excel
+            ws = wb.active  # Seleccionar la hoja activa
+
+            datos = []
+            for row in ws.iter_rows(min_row=1, max_row=5, values_only=True):
+                datos.append(row)
+
+            ui.notify(f"Primeros datos del Excel:\n {datos}")
+
+        except Exception as e:
+            ui.notify(f"Error al leer el archivo: {str(e)}", type="negative")
+
+
+
+    def mostrar_grafica():
+        ui.label("Gráfica de categorías:").classes('text-1xl font-bold')
+        with ui.row().classes('w-full mb-2'):
+            
+            # Crear la gráfica de barras con colores personalizados
+            chart = (
+                Bar()
+                .add_xaxis(['Alumnos MCC'])  # Los valores del eje X
+                .add_yaxis(
+                    'Excelente',  # Nombre de la categoría
+                    [pronosticos_grafica.count(1)],  # Datos
+                    itemstyle_opts={
+                        'color': '#a8e6cf'  # Color de las barras
+                    }
+                )
+                .add_yaxis(
+                    'Bueno',
+                    [pronosticos_grafica.count(2)],
+                    itemstyle_opts={
+                        'color': '#00aaff'
+                    }
+                )
+                .add_yaxis(
+                    'Regular',
+                    [pronosticos_grafica.count(3)],
+                    itemstyle_opts={
+                        'color': '#ffec70'
+                    }
+                )
+                .add_yaxis(
+                    'Malo',
+                    [pronosticos_grafica.count(4)],
+                    itemstyle_opts={
+                        'color': '#ff4d6d'
+                    }
+                )
+                .set_global_opts(
+                    xaxis_opts={'axislabel_opts': {'formatter': JsCode(r'(val, idx) => `Grupo ${val}`')}},
+                    yaxis_opts={'axislabel_opts': {'formatter': JsCode(r'(val, idx) => `${val}%`')}},
+                )
+            )
+
+
+            # Renderizar en NiceGUI
+            ui.echart.from_pyecharts(chart).classes('w-full w-[500px] h-[400px]')
+
+            
+            ui.echart({
+            'xAxis': {'type': 'value'},
+            'yAxis': {'type': 'category', 'data': ['1', '2', '3', '4'], 'inverse': True},
+            'legend': {'textStyle': {'color': 'gray'}},
+            'series': [
+                {'type': 'bar', 'name': 'MCC', 'color': '#00aaff', 'data': [pronosticos_grafica.count(1), pronosticos_grafica.count(2), pronosticos_grafica.count(3), pronosticos_grafica.count(4)]},
+                {'type': 'bar', 'name': 'DCC', 'color': '#0054a8', 'data': [(resultados_dataDCC['PRONOSTICO'] == 1).sum(), (resultados_dataDCC['PRONOSTICO'] == 2).sum(), (resultados_dataDCC['PRONOSTICO'] == 3).sum(), (resultados_dataDCC['PRONOSTICO'] == 4).sum()]},
+            ],
+        }).classes('w-full w-[500px] h-[400px]')
+
+
+
+
+
+
     # Construir correctamente las filas con id y nombre
     rows = [{'id': alumno['ID'], 'nombre': alumno['NOMBRE'], 'sexo': alumno['SEXO'], 'edad': alumno['EDAD'], 'entidad': alumno['ENTIDAD FEDERATIVA'],
                 'estado_civil': alumno['ESTADO CIVIL'],
              } for alumno in alumnos_data]
+    
+
+    def mostrar_alumnos():
+        global visible_columns
+        visible_columns = ['id', 'pronostico', 'nombre', 'sexo', 'edad', 'entidad', 'estado_civil']
+        actualizar_tabla()
+
+    def mostrar_carrera():
+        global visible_columns
+        visible_columns = ['id', 'tesis', 'carrera', 'linea', 'generacion', 'semestre', 'promedio', 'creditos', 'terminacion']
+        actualizar_tabla()
+
+    def mostrar_calificaciones():
+        global visible_columns
+        visible_columns = ['id', 'p1', 'C1', 'p2', 'C2', 'p3', 'C3', 'p4', 'C4', 'p5', 'C5', 'p6', 'C6']
+        actualizar_tabla()
+
+    def mostrar_materias():
+        global visible_columns
+        visible_columns = ['id', 'b1', 'b2', 'b3', 'b4', 'o1', 'o2', 'o3', 'o4', 'o5', 's1', 's2', 's3']
+        actualizar_tabla()
+
+    def mostrar_16fp():
+        global visible_columns
+        visible_columns = ['id', 'fp1', 'factor1', 'fp2', 'factor2', 'fp3', 'factor3', 'fp4', 'factor4', 'fp5', 'factor5', 'fp6', 'factor6', 'fp7', 'factor7', 'fp8', 'factor8',
+                           'fp9', 'factor9', 'fp10', 'factor10', 'fp11', 'factor11', 'fp12', 'factor12', 'fp13', 'factor13', 'fp14', 'factor14', 'fp15', 'factor15', 'fp16', 'factor16']
+        actualizar_tabla()
+
+
+    def mostrar_resultados():
+        global visible_columns
+        visible_columns = ['id', 'meses', 'clase', 'factores', 'porcentaje', 'pronostico']
+        actualizar_tabla()
+
+
+    def actualizar_tabla():
+        content_area.clear()
+        with content_area:
+            ui.label("Panel de control").classes('text-2xl font-bold')
+
+            with ui.dropdown_button('Seleccionar tabla', auto_close=True).props('outline square'):
+                ui.item('Alumnos', on_click=mostrar_alumnos)
+                ui.item('Carrera', on_click=mostrar_carrera)
+                ui.item('Calificaciones', on_click=mostrar_calificaciones)
+                ui.item('Materias', on_click=mostrar_materias)
+                ui.item('16FP', on_click=mostrar_16fp)
+                ui.item('Resultados', on_click=mostrar_resultados)
+
+
+            ui.separator()
+            ui.label("Base de datos MCC:").classes('text-1xl font-bold')
+
+            with ui.scroll_area().classes('w-[1150px] h-[400px]'):
+                table = ui.table(
+                    columns=[{'name': col, 'label': col.upper(), 'field': col, 'align': 'left', 'sortable': False} for col in visible_columns],
+                    rows=[{col: row[col] for col in visible_columns} for row in rows],  # Filtra los datos
+                    row_key='id',
+                    pagination=5,
+                )
+            ui.input('Filtrar').bind_value(table, 'filter')
+            ui.separator()
+            mostrar_grafica()
+            ui.separator()
+            ui.button('Abrir base de datos en Excel', on_click=lambda: ui.notify('You clicked me!')).props('color=green')
+    
+
     
     rowscarrera = [{'tesis': carrera['TESIS'], 'carrera': carrera['CARRERA'], 'linea': carrera['LINEA'], 'generacion': f"{carrera['GENERA5ON'].year}-{carrera['GENERA5ON'].month}",
                     'semestre': carrera['SEMESTRE'], 'promedio': carrera['PROMEDIO'], 'creditos': carrera['CREDITOS 1S'], 'terminacion': carrera['TERMINACION']
@@ -196,6 +369,16 @@ def show_levels():
     content_area.clear()
     with content_area:
         ui.label("Panel de control").classes('text-2xl font-bold')
+        
+        with ui.dropdown_button('Seleccionar tabla', auto_close=True).props('outline square'):
+            ui.item('Alumnos', on_click=mostrar_alumnos)
+            ui.item('Carrera', on_click=mostrar_carrera)
+            ui.item('Calificaciones', on_click=mostrar_calificaciones)
+            ui.item('Materias', on_click=mostrar_materias)
+            ui.item('16FP', on_click=mostrar_16fp)
+            ui.item('Resultados', on_click=mostrar_resultados)
+
+        ui.separator()
         ui.label("Base de datos MCC:").classes('text-1xl font-bold')
         with ui.scroll_area().classes('w-[1150px] h-[400px]'):
             table = ui.table(
@@ -283,63 +466,12 @@ def show_levels():
         ui.input('Filtrar').bind_value(table, 'filter')
 
         ui.separator()
-
-        ui.label("Gráfica de categorías:").classes('text-1xl font-bold')
-        with ui.row().classes('w-full mb-2'):
-            
-            # Crear la gráfica de barras con colores personalizados
-            chart = (
-                Bar()
-                .add_xaxis(['Alumnos MCC'])  # Los valores del eje X
-                .add_yaxis(
-                    'Excelente',  # Nombre de la categoría
-                    [pronosticos_grafica.count(1)],  # Datos
-                    itemstyle_opts={
-                        'color': 'green'  # Color de las barras
-                    }
-                )
-                .add_yaxis(
-                    'Bueno',
-                    [pronosticos_grafica.count(2)],
-                    itemstyle_opts={
-                        'color': 'blue'
-                    }
-                )
-                .add_yaxis(
-                    'Regular',
-                    [pronosticos_grafica.count(3)],
-                    itemstyle_opts={
-                        'color': 'yellow'
-                    }
-                )
-                .add_yaxis(
-                    'Malo',
-                    [pronosticos_grafica.count(4)],
-                    itemstyle_opts={
-                        'color': 'red'
-                    }
-                )
-                .set_global_opts(
-                    xaxis_opts={'axislabel_opts': {'formatter': JsCode(r'(val, idx) => `Grupo ${val}`')}},
-                    yaxis_opts={'axislabel_opts': {'formatter': JsCode(r'(val, idx) => `${val}%`')}},
-                )
-            )
+        mostrar_grafica()
+        ui.separator()
+        #ui.label("Panel de control").classes('text-2xl font-bold')
+        ui.button('Abrir base de datos en Excel', on_click=abrir_excel).props('color=green')
 
 
-            # Renderizar en NiceGUI
-            ui.echart.from_pyecharts(chart).classes('w-full w-[500px] h-[400px]')
-
-            
-            ui.echart({
-            'xAxis': {'type': 'value'},
-            'yAxis': {'type': 'category', 'data': ['1', '2', '3', '4'], 'inverse': True},
-            'legend': {'textStyle': {'color': 'gray'}},
-            'series': [
-                {'type': 'bar', 'name': 'MCC', 'data': [pronosticos_grafica.count(1), pronosticos_grafica.count(2), pronosticos_grafica.count(3), pronosticos_grafica.count(4)]},
-                {'type': 'bar', 'name': 'DCC', 'data': [(resultados_dataDCC['PRONOSTICO'] == 1).sum(), (resultados_dataDCC['PRONOSTICO'] == 2).sum(), (resultados_dataDCC['PRONOSTICO'] == 3).sum(), (resultados_dataDCC['PRONOSTICO'] == 4).sum()]},
-            ],
-        }).classes('w-full w-[500px] h-[400px]')
-            
 
 
 
